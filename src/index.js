@@ -88,4 +88,17 @@ export default class Zeroconf extends EventEmitter {
     RNZeroconf.stop()
   }
 
+  /**
+   * Publish a service.
+   */
+  publish (name, type, port, protocol = 'tcp', domain = 'local.') {
+    RNZeroconf.publish(name, type, port, protocol, domain)
+  }
+
+  /**
+   * Stop a published service.
+   */
+  unpublish (name, type, port, protocol = 'tcp', domain = 'local.') {
+    RNZeroconf.unpublish(name, type, port, protocol, domain)
+  }
 }

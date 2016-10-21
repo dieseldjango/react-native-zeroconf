@@ -14,5 +14,6 @@
 @interface RNZeroconf : NSObject <RCTBridgeModule, NSNetServiceBrowserDelegate, NSNetServiceDelegate>
 
 @property (nonatomic, strong) NSNetServiceBrowser *browser;
+@property (nonatomic, strong) NSMutableArray *publishedServices;
 
 @end

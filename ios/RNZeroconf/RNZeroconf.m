@@ -33,6 +33,61 @@ RCT_EXPORT_METHOD(stop)
     [self.resolvingServices removeAllObjects];
 }
 
+RCT_EXPORT_METHOD(publish:(NSString *)name type:(NSString *)type port:(NSInteger)port
+                  protocol:(NSString *)protocol domain:(NSString *)domain)
+{
+    NSNetService *service;
+    NSString *fullType = [NSString stringWithFormat:@"_%@._%@", type, protocol];
+    
+    service = [[NSNetService alloc] initWithDomain:domain
+                                         type:fullType
+                                         name:name
+                                         port:(int)port];
+    if(service) {
+        NSLog(@"Publishing service: name=\"%@\", type=\"%@\", port=%ld, domain=\"%@\"", name, fullType, (long)port, domain);
+        [service setDelegate:self];
+        [service publish];
+        [_publishedServices addObject:service];
+    } else {
+        NSLog(@"An error occurred initializing the NSNetService object.");
+        [self reportError:@{ @"Error" : @"An error occurred initializing the NSNetService object." }];
+    }
+}
+
+RCT_EXPORT_METHOD(unpublish:(NSString *)name type:(NSString *)type port:(NSInteger)port
+                  protocol:(NSString *)protocol domain:(NSString *)domain)
+{
+    NSPredicate *predicate = [NSPredicate
+        predicateWithFormat:@"(name == %@) AND (type == %@) AND (domain == %@) AND (port == %d", name,
+        [NSString stringWithFormat:@"_%@.%@.", type, protocol], domain, port];
+    
+    for (NSNetService *service in [_publishedServices filteredArrayUsingPredicate:predicate]) {
+        NSLog(@"Unpublishing service \"%@\"", name);
+        [_publishedServices removeObject:service];
+        [service stop];
+        [self.bridge.eventDispatcher sendDeviceEventWithName:@"RNZeroConfUnpublish" body:service];
+    }
+}
+
+#pragma mark - NSNetServiceDelegate
+
+// When a service fails to publish
+- (void) netService:(NSNetService *) sender didNotPublish:(NSDictionary*) errorDict
+{
+    NSLog(@"Service failed to publish");
+    if ([_publishedServices containsObject:sender])
+        [_publishedServices removeObject:sender];
+    [self reportError:errorDict];
+}
+
+// When a service is successfully published
+- (void) netServiceDidPublish:(NSNetService*) sender
+{
+    NSLog(@"Service \"%@\" published on port %ld", [sender name], (long)[sender port]);
+    NSDictionary *serviceInfo = [RNNetServiceSerializer serializeServiceToDictionary:sender resolved:YES];
+    [self.bridge.eventDispatcher sendDeviceEventWithName:@"RNZeroconfPublish" body:serviceInfo];
+}
+
 #pragma mark - NSNetServiceBrowserDelegate
 
 // When a service is discovered.
@@ -112,6 +167,7 @@ RCT_EXPORT_METHOD(stop)
         _resolvingServices = [[NSMutableDictionary alloc] init];
         _browser = [[NSNetServiceBrowser alloc] init];
         [_browser setDelegate:self];
+        _publishedServices = [[NSMutableArray alloc] init];
     }
 
     return self;
