@@ -4,6 +4,7 @@
   "description": "A Zeroconf discovery utility for react-native",
   "main": "dist",
   "scripts": {
+    "prepublish": "npm run build",
     "lint": "eslint src/*.js",
     "build": "rm -rf dist && mkdir dist && babel src -o dist/index.js"
   },
