@@ -7,14 +7,17 @@ Get running services advertizing themselves using Zeroconf implementations like 
 ### Install
 
     npm i -S react-native-zeroconf
-    rnpm link react-native-zeroconf
+    react-native install react-native-zeroconf
+    react-native link react-native-zeroconf
 
 You can look at [the wiki](https://github.com/Apercu/react-native-zeroconf/wiki) if you prefer a manual install.
 
 ### API
 
-    import Zeroconf from 'react-native-zeroconf'
-    const zeroconf = new Zeroconf()
+```javascript
+import Zeroconf from 'react-native-zeroconf'
+const zeroconf = new Zeroconf()
+```
 
 ##### Methods
 
@@ -32,7 +35,9 @@ Will return all names of services that have been resolved.
 
 ##### Events
 
-    zeroconf.on('start', () => console.log('The scan has started.'))
+```javascript
+zeroconf.on('start', () => console.log('The scan has started.'))
+```
 
 ###### `start` Triggered on scan start
 ###### `stop` Triggered on scan stop
@@ -44,16 +49,18 @@ Broadcast a service name as soon as it is found.
 
 Broadcast a service object once it is fully resolved
 
-    {
-      host: 'XeroxPrinter.local.',
-      addresses: [
-        '192.168.1.23',
-        'fe80::aebc:123:ffff:abcd'
-      ],
-      name: 'Xerox Printer',
-      fullName: 'XeroxPrinter.local._http._tcp.',
-      port: 8080
-    }
+```json
+{
+  "host": "XeroxPrinter.local.",
+  "addresses": [
+    "192.168.1.23",
+    "fe80::aebc:123:ffff:abcd"
+  ],
+  "name": "Xerox Printer",
+  "fullName": "XeroxPrinter.local._http._tcp.",
+  "port": 8080
+}
+```
 
 ###### `remove` Triggered when a service is removed
 
